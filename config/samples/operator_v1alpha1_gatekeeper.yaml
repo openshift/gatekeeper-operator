@@ -1,0 +1,18 @@
+apiVersion: operator.gatekeeper.sh/v1alpha1
+kind: Gatekeeper
+metadata:
+  name: gatekeeper
+spec:
+  # Add fields here
+  image:
+    registry: docker.io
+    repository: openpolicyagent
+    image: gatekeeper
+    version: v3.1.1
+  audit:
+    replicas: 1
+    logLevel: INFO
+  validatingWebhook: Enabled
+  webhook:
+    replicas: 2
+    logLevel: INFO
