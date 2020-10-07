@@ -1,0 +1,27 @@
+# Build the manager binary
+FROM registry.svc.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.6 as builder
+
+WORKDIR /workspace
+# Copy the Go Modules manifests
+COPY go.mod go.mod
+COPY go.sum go.sum
+
+# Copy the go source
+COPY main.go main.go
+COPY api/ api/
+COPY controllers/ controllers/
+COPY pkg/ pkg/
+COPY vendor/ vendor/
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor -a -o manager main.go
+
+FROM registry.svc.ci.openshift.org/ocp/4.6:base
+COPY --from=builder /workspace/manager .
+
+LABEL io.k8s.display-name="Gatekeeper Operator" \
+    io.k8s.description="The OPA based admission controller" \
+    io.openshift.tags="openshift" \
+    maintainer="Ivan Font <ifont@redhat.com>"
+
+ENTRYPOINT ["/manager"]
